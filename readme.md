@@ -28,6 +28,7 @@ In your `site/config.php` options set the [ImageOptim API key](https://imageopti
 Generate thumbs as usual using `resize()` File Method.
 
 ```php
+$img = $page->image('ukulele.jpg');
 echo $img->resize(234)->html();
 ```
 
