@@ -6,7 +6,6 @@ Kirby 3 CMS Thumb Component to optimize images using ImageOptim Api.
 
 This plugin is free but if you use it in a commercial project please consider to [make a donation 🍻](https://www.paypal.me/bnomei/5).
 
-If you need a lot of thumbs optimized [Imagekit](https://github.com/fabianmichael/kirby-imagekit) is a good alternative. But if you need to preserve the exact color temperatures and hiqh quality of an image Imageoptim provides better results since it does not use GD or Imagick.
 
 ## Requirements
 
@@ -26,7 +25,7 @@ In your `site/config.php` options set the [ImageOptim API key](https://imageopti
 
 ## Usage
 
-Generate Thumbs as usual using `resize()` File Method.
+Generate thumbs as usual using `resize()` File Method.
 
 ```php
 echo $img->resize(234)->html();
@@ -35,6 +34,12 @@ echo $img->resize(234)->html();
 > *TIP:*
 > If you want your image to be optimized but retain original size use:
 > `$img->resize()` without providing a width or height.
+
+## Settings
+
+### bnomei.thumbimageoptim.optimize
+- default: `true`
+- set to `false` to disable optimization with this plugin
 
 ## Disclaimer
 
