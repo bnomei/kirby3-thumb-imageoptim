@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "cf20784b7b659d374a1bf23c8a566c95",
-    "content-hash": "2b301e7d95b43afca2b36584e0f77d65",
+    "hash": "89ef92925cd973bdfff85c2f58664ef1",
+    "content-hash": "4ebed9a1ecbf48acd657e6d47a669b73",
     "packages": [
         {
             "name": "claviska/simpleimage",
@@ -844,7 +844,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "beta",
-    "stability-flags": [],
+    "stability-flags": {
+        "getkirby/cms": 10
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

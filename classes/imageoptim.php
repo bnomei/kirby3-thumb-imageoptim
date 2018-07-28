@@ -14,9 +14,17 @@ class Imageoptim {
   }
 
   static public function kirbyThumb($src, $dst, $options) {
-      // TODO: call kirby thumbs() with options
-      \Kirby\Toolkit\F::copy($src, $dst);
-      return $dst;
+    // https://github.com/k-next/kirby/blob/ba35c9b087156074eb79cfbc1196797ddf201702/config/components.php#L87
+    $config   = kirby()->option('thumbs', []);
+    $darkroom = Kirby\Image\Darkroom::factory($config['driver'] ?? 'gd', $config);
+    $options  = $darkroom->preprocess($src, $options);
+    $root     = (new Kirby\Cms\Filename($src, $dst, $options))->toString();
+    // check if the thumbnail has to be regenerated
+    if (file_exists($root) !== true || filemtime($root) < filemtime($src)) {
+        Kirby\Toolkit\F::copy($src, $root);
+        $darkroom->process($root, $options);
+    }
+    return $root;
   }
 
   static public function thumb($src, $dst, $options) {
