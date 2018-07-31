@@ -43,7 +43,10 @@ class Imageoptim {
             $request = $api->imageFromPath($src);
         } else {
             // request download
-            $url = str_replace(kirby()->roots()->base(), kirby()->site()->url(), $src);
+            $page = page(ltrim(str_replace(kirby()->roots()->content(), '', \dirname($src)), '/'));
+            if($img = $page->files(\pathinfo($src, PATHINFO_FILENAME))->first()) {
+                $url = $img->url();
+            }
             $request = $api->imageFromURL($url);
         }
         if($request) {
