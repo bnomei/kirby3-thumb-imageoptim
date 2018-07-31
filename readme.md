@@ -1,6 +1,6 @@
 # Kirby 3 Thumb Imageoptim
 
-![GitHub release](https://img.shields.io/github/release/bnomei/kirby3-thumb-imageoptim.svg?maxAge=1800) ![License](https://img.shields.io/github/license/mashape/apistatus.svg) ![Kirby Version](https://img.shields.io/badge/Kirby-3%2B-red.svg)
+![GitHub release](https://img.shields.io/github/release/bnomei/kirby3-thumb-imageoptim.svg?maxAge=1800) ![License](https://img.shields.io/github/license/mashape/apistatus.svg) ![Kirby Version](https://img.shields.io/badge/Kirby-3%2B-black.svg)
 
 Kirby 3 CMS Thumb Component to optimize images using ImageOptim Api.
 
