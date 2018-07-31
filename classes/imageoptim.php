@@ -43,7 +43,20 @@ class Imageoptim {
             $request = $api->imageFromPath($src);
         } else {
             // request download
-            $page = page(ltrim(str_replace(kirby()->roots()->content(), '', \dirname($src)), '/'));
+
+            // TODO: splitting path is a hack. might not be underscore forever.
+            $path = explode('/', ltrim(str_replace(kirby()->roots()->content(), '', \dirname($src)), '/'));
+            $pathO = array_map(function($v) {
+                $pos = strpos($v, '_');
+                if($pos === false) {
+                    $v;
+                } else {
+                    return substr($v, $pos+1);
+                }
+            }, $path);
+            $pathO = implode('/', $pathO);
+            $page = page($pathO);
+            
             if($img = $page->files(\pathinfo($src, PATHINFO_FILENAME))->first()) {
                 $url = $img->url();
             }
