@@ -1,5 +1,7 @@
 <?php
 
+Bnomei\Imageoptim::beforeRegisterComponent();
+
 Kirby::plugin('bnomei/thumbimageoptim', [
   'options' => [
     'optimize' => true,
@@ -12,7 +14,7 @@ Kirby::plugin('bnomei/thumbimageoptim', [
   ],
   'components' => [
       'thumb' => function ($kirby, $src, $dst, $options) {
-        return \Bnomei\Imageoptim::thumb($src, $dst, $options);
+          return \Bnomei\Imageoptim::thumb($src, $dst, $options);
       }
     ]
 ]);
