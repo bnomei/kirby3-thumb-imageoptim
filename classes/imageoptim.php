@@ -57,7 +57,7 @@ class Imageoptim {
             $pathO = implode('/', $pathO);
             $page = page($pathO);
             
-            if($img = $page->files(\pathinfo($src, PATHINFO_FILENAME))->first()) {
+            if($img = $page->files(\pathinfo($src, PATHINFO_BASENAME))->first()) {
                 $url = $img->url();
             }
             $request = $api->imageFromURL($url);
