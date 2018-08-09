@@ -32,11 +32,11 @@ class Imageoptim
 
     public static function thumb($src, $dst, $options)
     {
-        $root = (new \Kirby\Cms\Filename($src, $dst, $options))->toString();
-        if (\file_exists($root) === true && \filemtime($root) >= \filemtime($src)) {
-            return $root;
+        // $root = (new \Kirby\Cms\Filename($src, $dst, $options))->toString();
+        if (\file_exists($dst) == true && \filemtime($dst) >= \filemtime($src)) {
+            return $dst;
         } else {
-            \Kirby\Toolkit\F::copy($src, $root);
+            \Kirby\Toolkit\F::copy($src, $dst);
         }
 
         $api = static::instance();
@@ -71,9 +71,11 @@ class Imageoptim
                 
                 $page = page($pathO);
 
-                if ($img = $page->files(\pathinfo($src, PATHINFO_BASENAME))->first()) {
+                if ($img = $page->image(\pathinfo($src, PATHINFO_BASENAME))) {
                     $url = $img->url();
                     $request = $api->imageFromURL($url);
+                } else {
+                    // $request = $api->imageFromPath($src);
                 }
                 
             }
