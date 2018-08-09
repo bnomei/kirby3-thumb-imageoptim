@@ -35,6 +35,8 @@ class Imageoptim
         $root = (new \Kirby\Cms\Filename($src, $dst, $options))->toString();
         if (\file_exists($root) === true && \filemtime($root) >= \filemtime($src)) {
             return $root;
+        } else {
+            \Kirby\Toolkit\F::copy($src, $root);
         }
 
         $api = static::instance();
@@ -66,12 +68,14 @@ class Imageoptim
                     }
                 }, $path);
                 $pathO = implode('/', $pathO);
+                
                 $page = page($pathO);
 
                 if ($img = $page->files(\pathinfo($src, PATHINFO_BASENAME))->first()) {
                     $url = $img->url();
+                    $request = $api->imageFromURL($url);
                 }
-                $request = $api->imageFromURL($url);
+                
             }
             if ($request) {
                 $request = $request->resize(
