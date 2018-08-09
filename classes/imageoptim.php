@@ -32,6 +32,11 @@ class Imageoptim
 
     public static function thumb($src, $dst, $options)
     {
+        $root = (new \Kirby\Cms\Filename($src, $dst, $options))->toString();
+        if (\file_exists($root) === true && \filemtime($root) >= \filemtime($src)) {
+            return $root;
+        }
+
         $api = static::instance();
         if (!option('bnomei.thumbimageoptim.optimize') || !$api) {
             return static::kirbyThumb($src, $dst, $options);
@@ -62,7 +67,7 @@ class Imageoptim
                 }, $path);
                 $pathO = implode('/', $pathO);
                 $page = page($pathO);
-            
+
                 if ($img = $page->files(\pathinfo($src, PATHINFO_BASENAME))->first()) {
                     $url = $img->url();
                 }
