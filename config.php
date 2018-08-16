@@ -1,6 +1,9 @@
 <?php
 
-Bnomei\Imageoptim::beforeRegisterComponent();
+if(!class_exists('Bnomei\Imageoptim')) {
+    require_once __DIR__ . '/classes/imageoptim.php';
+    Bnomei\Imageoptim::beforeRegisterComponent();
+}
 
 Kirby::plugin('bnomei/thumbimageoptim', [
   'options' => [
