@@ -14,6 +14,14 @@ Kirby::plugin('bnomei/thumbimageoptim', [
         'io_dpr' => '1',
     ],
     'timelimit' => 30, // set_time_limit
+    'log.enabled' => false,
+    'log' => function(string $msg, string $level = 'info', array $context = []):bool {
+        if(option('bnomei.thumbimageoptim.log.enabled') && function_exists('kirbyLog')) {
+            kirbyLog('bnomei.thumbimageoptim.log')->log($msg, $level, $context);
+            return true;
+        }
+        return false;
+    },
   ],
   'components' => [
       'thumb' => function ($kirby, $src, $dst, $options) {

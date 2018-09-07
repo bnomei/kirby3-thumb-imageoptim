@@ -14,13 +14,28 @@ class Imageoptim
         return static::$instance;
     }
 
+    private static function log(string $msg = '', string $level = 'info', array $context = []):bool {
+        $log = option('bnomei.thumbimageoptim.log');
+        if($log && is_callable($log)) {
+            if (!option('debug') && $level == 'debug') {
+                // skip but...
+                return true;
+            } else {
+                return $log($msg, $level, $context);
+            }
+        }
+        return false;
+    }
+
     private static $kirbyThumbsComponent = null;
     public static function beforeRegisterComponent()
     {
         if (!static::$kirbyThumbsComponent) {
+            static::log('beforeRegisterComponent', 'debug');
             static::$kirbyThumbsComponent = kirby()->component('thumb');
         }
     }
+    
 
     public static function kirbyThumb($src, $dst, $options)
     {
@@ -34,13 +49,30 @@ class Imageoptim
     {
         // $root = (new \Kirby\Cms\Filename($src, $dst, $options))->toString();
         if (\file_exists($dst) == true && \filemtime($dst) >= \filemtime($src)) {
+            static::log('exists', 'debug', [
+                'src' => $src,
+                'src-filemtime' => date('c', \filemtime($src)),
+                'dst' => $dst,
+                'dst-filemtime' => date('c', \filemtime($dst)),
+            ]);
             return $dst;
         } else {
             \Kirby\Toolkit\F::copy($src, $dst);
+            static::log('copy', 'debug', [
+                'src' => $src,
+                'src-filemtime' => date('c', \filemtime($src)),
+                'dst' => $dst,
+                'dst-filemtime' => date('c', \filemtime($dst)),
+            ]);
         }
 
         $api = static::instance();
         if (!option('bnomei.thumbimageoptim.optimize') || !$api) {
+            static::log('kirbyThumb:early', 'debug', [
+                'src' => $src,
+                'dst' => $dst,
+                'options' => $options,
+            ]);
             return static::kirbyThumb($src, $dst, $options);
         }
 
@@ -54,6 +86,11 @@ class Imageoptim
             if (static::is_localhost()) {
                 // upload
                 $request = $api->imageFromPath($src);
+                static::log('imageFromPath', 'debug', [
+                    'src' => $src,
+                    'dst' => $dst,
+                    'options' => $options,
+                ]);
             } else {
                 // request download
 
@@ -74,8 +111,20 @@ class Imageoptim
                 if ($img = $page->image(\pathinfo($src, PATHINFO_BASENAME))) {
                     $url = $img->url();
                     $request = $api->imageFromURL($url);
+                    static::log('imageFromURL', 'debug', [
+                        'src' => $src,
+                        'dst' => $dst,
+                        'dst-url' => $url,
+                        'options' => $options,
+                    ]);
                 } else {
-                    // $request = $api->imageFromPath($src);
+                    static::log('Image not found at Page-object', 'warning', [
+                        'src' => $src,
+                        'dst' => $dst,
+                        'pathO' => $pathO,
+                        'file' => \pathinfo($src, PATHINFO_BASENAME),
+                        'options' => $options,
+                    ]);
                 }
                 
             }
@@ -92,15 +141,37 @@ class Imageoptim
                 if ($tl = option('bnomei.thumbimageoptim.timelimit')) {
                     set_time_limit(intval($tl));
                 }
-                $success = \Kirby\Toolkit\F::write($dst, $request->getBytes());
+                $bytes = $request->getBytes();
+                if(is_string($bytes) && strpos($bytes, 'trial') != -1) {
+                    $success = false;
+                    // new \Kirby\Exception($bytes);
+                    static::log($bytes, 'warning', [
+                        'src' => $src,
+                        'dst' => $dst,
+                        'options' => $options,
+                    ]);
+                } else {
+                    $success = \Kirby\Toolkit\F::write($dst, $bytes);
+                }
             }
         } catch (Exception $ex) {
+            static::log($ex->getMessage(), 'error', [
+                'src' => $src,
+                'dst' => $dst,
+                'options' => $options,
+            ]);
             new \Kirby\Exception($ex->getMessage());
         }
 
         if ($success) {
             return $dst;
         }
+        // else
+        static::log('kirbyThumb:late', 'debug', [
+            'src' => $src,
+            'dst' => $dst,
+            'options' => $options,
+        ]);
         return static::kirbyThumb($src, $dst, $options);
     }
 
