@@ -35,7 +35,7 @@ class Imageoptim
             static::$kirbyThumbsComponent = kirby()->component('thumb');
         }
     }
-    
+
 
     public static function kirbyThumb($src, $dst, $options)
     {
@@ -105,7 +105,7 @@ class Imageoptim
                     }
                 }, $path);
                 $pathO = implode('/', $pathO);
-                
+
                 $page = page($pathO);
 
                 if ($img = $page->image(\pathinfo($src, PATHINFO_BASENAME))) {
@@ -126,7 +126,7 @@ class Imageoptim
                         'options' => $options,
                     ]);
                 }
-                
+
             }
             if ($request) {
                 $request = $request->resize(
@@ -142,17 +142,7 @@ class Imageoptim
                     set_time_limit(intval($tl));
                 }
                 $bytes = $request->getBytes();
-                if(is_string($bytes) && strpos($bytes, 'trial') != -1) {
-                    $success = false;
-                    // new \Kirby\Exception($bytes);
-                    static::log($bytes, 'warning', [
-                        'src' => $src,
-                        'dst' => $dst,
-                        'options' => $options,
-                    ]);
-                } else {
-                    $success = \Kirby\Toolkit\F::write($dst, $bytes);
-                }
+                $success = \Kirby\Toolkit\F::write($dst, $bytes);
             }
         } catch (Exception $ex) {
             static::log($ex->getMessage(), 'error', [
