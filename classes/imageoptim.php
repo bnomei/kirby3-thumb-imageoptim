@@ -97,7 +97,8 @@ class Imageoptim
                 // TODO: splitting path is a hack. might not be underscore forever.
                 $path = explode('/', ltrim(str_replace(kirby()->roots()->content(), '', \dirname($src)), '/'));
                 $pathO = array_map(function ($v) {
-                    $pos = strpos($v, '_');
+                    // https://github.com/bnomei/kirby3-thumb-imageoptim/issues/2
+                    $pos = strpos($v, \Kirby\Cms\Dir::$numSeparator); // '_'
                     if ($pos === false) {
                         $v;
                     } else {
