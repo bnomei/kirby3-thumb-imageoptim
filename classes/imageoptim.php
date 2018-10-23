@@ -141,7 +141,11 @@ class Imageoptim
                 if ($tl = option('bnomei.thumbimageoptim.timelimit')) {
                     set_time_limit(intval($tl));
                 }
-                $bytes = $request->getBytes();
+                
+                // https://github.com/bnomei/kirby3-thumb-imageoptim/issues/4
+                // $bytes = $request->getBytes();
+                // https://github.com/ImageOptim/php-imageoptim-api#apiurl--debug-or-use-another-https-client
+                $bytes = \Kirby\Http\Remote::get($request->apiURL(), ['method' => 'POST'])->content();
                 $success = \Kirby\Toolkit\F::write($dst, $bytes);
             }
         } catch (Exception $ex) {

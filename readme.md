@@ -10,7 +10,6 @@ This plugin is free but if you use it in a commercial project please consider to
 ## Requirements
 
 - [ImageOptim API key](https://imageoptim.com/api/register) (trial available). This plugin uses v1.3.1.
-- `allow_url_fopen` PHP setting must be enabled for the API to work. Check with `ini_get('allow_url_fopen')`. Please be aware of the potential security risks caused by allow_url_fopen!
 
 ## Setup
 
