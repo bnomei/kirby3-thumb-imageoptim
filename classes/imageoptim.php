@@ -84,7 +84,7 @@ class Imageoptim
         try {
             // https://github.com/ImageOptim/php-imageoptim-api
             $request = null;
-            if (static::is_localhost()) {
+            if (static::is_localhost() || option('bnomei.thumbimageoptim.forceupload')) {
                 // upload
                 $request = $api->imageFromPath($src);
                 static::log('imageFromPath', 'debug', [
@@ -112,7 +112,7 @@ class Imageoptim
                 if ($img = $page->image(\pathinfo($src, PATHINFO_BASENAME))) {
                     $url = $img->url();
                     $request = $api->imageFromURL($url);
-                    
+
                     static::log('imageFromURL', 'debug', [
                         'src' => $src,
                         'dst' => $dst,
@@ -145,13 +145,13 @@ class Imageoptim
 
                 $bytes = null;
                 // https://github.com/bnomei/kirby3-thumb-imageoptim/issues/4
-                if (static::is_localhost()) {
+                if (static::is_localhost() || option('bnomei.thumbimageoptim.forceupload')) {
                     $bytes = $request->getBytes();
                 } else {
                     static::log('Image URL', 'debug', [
                         'url' => $request->apiURL()
                     ]);
-                    
+
                     // https://github.com/ImageOptim/php-imageoptim-api#apiurl--debug-or-use-another-https-client
                     $bytes = \Kirby\Http\Remote::get($request->apiURL(), ['method' => 'POST'])->content();
                 }

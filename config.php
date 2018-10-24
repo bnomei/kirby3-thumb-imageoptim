@@ -8,6 +8,7 @@ if(!class_exists('Bnomei\Imageoptim')) {
 Kirby::plugin('bnomei/thumbimageoptim', [
   'options' => [
     'optimize' => true,
+    'forceupload' => false,
     'apikey' => null,
     'defaults' => [
         'io_quality' => 'medium',

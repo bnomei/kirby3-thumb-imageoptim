@@ -6,7 +6,6 @@ Kirby 3 CMS Thumb Component to optimize images using ImageOptim Api.
 
 This plugin is free but if you use it in a commercial project please consider to [make a donation 🍻](https://www.paypal.me/bnomei/3).
 
-
 ## Requirements
 
 - [ImageOptim API key](https://imageoptim.com/api/register) (trial available). This plugin uses v1.3.1.
@@ -40,6 +39,12 @@ echo $img->resize(234)->html();
 ### bnomei.thumbimageoptim.optimize
 - default: `true`
 - set to `false` to disable optimization with this plugin
+
+### bnomei.thumbimageoptim.forceupload
+- default: `false`
+- set to `true` when images are not public available (like a website with htpasswd).
+
+> DANGER: Content is always uploaded on localhost. `allow_url_fopen` PHP setting must be enabled for the API to do uploading. Check with `ini_get('allow_url_fopen')`. Please be aware of the potential security risks caused by `allow_url_fopen`!
 
 ## Disclaimer
 
