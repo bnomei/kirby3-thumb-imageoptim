@@ -14,9 +14,10 @@ class Imageoptim
         return static::$instance;
     }
 
-    private static function log(string $msg = '', string $level = 'info', array $context = []):bool {
+    private static function log(string $msg = '', string $level = 'info', array $context = []):bool
+    {
         $log = option('bnomei.thumbimageoptim.log');
-        if($log && is_callable($log)) {
+        if ($log && is_callable($log)) {
             if (!option('debug') && $level == 'debug') {
                 // skip but...
                 return true;
@@ -94,13 +95,12 @@ class Imageoptim
             } else {
                 // request download
 
-                // TODO: splitting path is a hack. might not be underscore forever.
                 $path = explode('/', ltrim(str_replace(kirby()->roots()->content(), '', \dirname($src)), '/'));
                 $pathO = array_map(function ($v) {
                     // https://github.com/bnomei/kirby3-thumb-imageoptim/issues/2
                     $pos = strpos($v, \Kirby\Cms\Dir::$numSeparator); // '_'
                     if ($pos === false) {
-                        $v;
+                        return $v;
                     } else {
                         return substr($v, $pos+1);
                     }
@@ -112,6 +112,7 @@ class Imageoptim
                 if ($img = $page->image(\pathinfo($src, PATHINFO_BASENAME))) {
                     $url = $img->url();
                     $request = $api->imageFromURL($url);
+                    
                     static::log('imageFromURL', 'debug', [
                         'src' => $src,
                         'dst' => $dst,
@@ -127,7 +128,6 @@ class Imageoptim
                         'options' => $options,
                     ]);
                 }
-
             }
             if ($request) {
                 $request = $request->resize(
@@ -148,13 +148,13 @@ class Imageoptim
                 if (static::is_localhost()) {
                     $bytes = $request->getBytes();
                 } else {
+                    static::log('Image URL', 'debug', [
+                        'url' => $request->apiURL()
+                    ]);
+                    
                     // https://github.com/ImageOptim/php-imageoptim-api#apiurl--debug-or-use-another-https-client
                     $bytes = \Kirby\Http\Remote::get($request->apiURL(), ['method' => 'POST'])->content();
                 }
-
-                static::log('Image URL', 'info', [
-                    'url' => $request->apiURL()
-                ]);
 
                 $success = $bytes ? \Kirby\Toolkit\F::write($dst, $bytes) : false;
             }
