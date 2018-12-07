@@ -4,7 +4,12 @@
 
 Kirby 3 CMS Thumb Component to optimize images using ImageOptim Api.
 
-This plugin is free but if you use it in a commercial project please consider to [make a donation 🍻](https://www.paypal.me/bnomei/3).
+## Commerical Usage
+
+This plugin is free but if you use it in a commercial project please consider to 
+- [make a donation 🍻](https://www.paypal.me/bnomei/3) or
+- [buy me ☕](https://buymeacoff.ee/bnomei) or
+- [buy a Kirby license using this affiliate link](https://a.paddle.com/v2/click/1129/35731?link=1170)
 
 ## Requirements
 
@@ -20,8 +25,6 @@ In your `site/config.php` options set the [ImageOptim API key](https://imageopti
     // ... other options
 ]
 ```
-
-## Usage
 
 Generate thumbs as usual using `resize()` File Method.
 
