@@ -2,8 +2,25 @@
     "name": "bnomei/kirby3-thumb-imageoptim",
     "description": "Kirby 3 Thumb Driver using Imageoptim",
     "type": "plugin",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Bruno Meilick",
+            "email": "b@bnomei.com"
+        }
+    ],
+    "keywords": [
+        "kirby3",
+        "kirby3-cms",
+        "kirby3-plugin",
+        "image-optimization",
+        "thumbnail",
+        "thumb",
+        "component"
+    ],
+    "suggest": {
+    },
     "autoload": {
         "files": [
             "config.php"
@@ -12,26 +29,32 @@
             "Bnomei\\": "classes/"
         }
     },
-    "authors": [
-        {
-            "name": "Bruno Meilick",
-            "email": "b@bnomei.com"
-        }
-    ],
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
     "repositories": [
         {
-          "type": "vcs",
-          "url": "https://github.com/k-next/kirby"
+            "type": "vcs",
+            "url": "https://github.com/k-next/kirby"
         }
     ],
     "require": {
-        "imageoptim/imageoptim": "^1.3",
-        "getkirby/cms": "dev-master as 3.0.0"
+        "php": ">=7.1.0",
+        "getkirby/cms": "^3.0.0-RC-2.0",
+        "imageoptim/imageoptim": "^1.3"
+    },
+    "conflict": {
+        "getkirby/kirby": "<3.0"
     },
     "scripts": {
-        "build": "composer update; composer dumpautoload -o;",
-        "dev-zip": "rm kirby3-thumb-imageoptim.zip; composer remove getkirby/cms; composer dumpautoload -o; composer archive --format=zip --file=kirby3-thumb-imageoptim; composer require getkirby/cms:'dev-master as 3.0.0'; composer dumpautoload -o;",
-        "zip": "rm kirby3-thumb-imageoptim.zip; composer update; composer remove getkirby/cms; composer dumpautoload -o; zip -r kirby3-thumb-imageoptim.zip . -x *.git*; composer require getkirby/cms:'dev-master as 3.0.0'; composer dumpautoload -o;"
-    },
-    "minimum-stability": "beta"
+        "zip": [
+            "rm kirby3-thumb-imageoptim.zip",
+            "composer install --no-dev",
+            "composer remove getkirby/cms",
+            "composer dumpautoload -o",
+            "zip -r kirby3-thumb-imageoptim.zip . -x *.git*",
+            "composer require getkirby/cms:'^3.0.0-RC-2.0'"
+        ]
+    }
 }
