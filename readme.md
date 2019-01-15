@@ -14,7 +14,7 @@ This plugin is free but if you use it in a commercial project please consider to
 ## Installation
 
 - for devkit-setup use `composer require bnomei/kirby3-thumb-imageoptim` or
-- extract latest release of [kirby3-thumb-imageoptim.zip](https://github.com/bnomei/kirby3-thumb-imageoptim/releases/download/v1.1.7/kirby3-thumb-imageoptim.zip) as folder `site/plugins/kirby3-thumb-imageoptim`
+- extract latest release of [kirby3-thumb-imageoptim.zip](https://github.com/bnomei/kirby3-thumb-imageoptim/releases/download/v1.2.0/kirby3-thumb-imageoptim.zip) as folder `site/plugins/kirby3-thumb-imageoptim`
 
 > Installation as a gitsubmodule is *not* supported.
 

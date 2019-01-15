@@ -1,10 +1,5 @@
 <?php
 
-if(!class_exists('Bnomei\Imageoptim')) {
-    require_once __DIR__ . '/classes/imageoptim.php';
-    Bnomei\Imageoptim::beforeRegisterComponent();
-}
-
 Kirby::plugin('bnomei/thumbimageoptim', [
   'options' => [
     'optimize' => true,
@@ -23,10 +18,16 @@ Kirby::plugin('bnomei/thumbimageoptim', [
         }
         return false;
     },
+    'cache' => true,
   ],
   'components' => [
       'thumb' => function ($kirby, $src, $dst, $options) {
-          return \Bnomei\Imageoptim::thumb($src, $dst, $options);
+        return \Bnomei\Imageoptim::thumb($src, $dst, $options);
       }
-    ]
+  ],
+  'hooks' => [
+    'route:before' => function () {
+        \Bnomei\Imageoptim::removeFilesOfUnfinishedJobs();
+    },
+  ],
 ]);
