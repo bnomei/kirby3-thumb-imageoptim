@@ -9,7 +9,7 @@ class Imageoptim
     {
         $apikey = option('bnomei.thumbimageoptim.apikey');
         if (is_callable($apikey)) {
-            $apikey = trimg($apikey());
+            $apikey = trim($apikey());
         }
         if ($apikey && !static::$instance) {
             static::$instance = new \ImageOptim\API($apikey);
