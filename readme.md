@@ -1,6 +1,6 @@
 # Kirby 3 Thumb Imageoptim
 
-![GitHub release](https://img.shields.io/github/release/bnomei/kirby3-thumb-imageoptim.svg?maxAge=1800) ![License](https://img.shields.io/github/license/mashape/apistatus.svg) ![Kirby Version](https://img.shields.io/badge/Kirby-3%2B-black.svg)
+![GitHub release](https://img.shields.io/github/release/bnomei/kirby3-thumb-imageoptim.svg?maxAge=1800) ![License](https://img.shields.io/github/license/mashape/apistatus.svg) ![Kirby Version](https://img.shields.io/badge/Kirby-3%2B-black.svg) ![Kirby 3 Pluginkit](https://img.shields.io/badge/Pluginkit-YES-cca000.svg)
 
 Kirby 3 CMS Thumb Component to optimize images using ImageOptim Api.
 
@@ -13,11 +13,9 @@ This plugin is free but if you use it in a commercial project please consider to
 
 ## Installation
 
-- for devkit-setup use `composer require bnomei/kirby3-thumb-imageoptim` or
-- extract latest release of [kirby3-thumb-imageoptim.zip](https://github.com/bnomei/kirby3-thumb-imageoptim/releases/download/v1.2.0/kirby3-thumb-imageoptim.zip) as folder `site/plugins/kirby3-thumb-imageoptim`
-
-> Installation as a gitsubmodule is *not* supported.
-
+- unzip [master.zip](https://github.com/bnomei/kirby3-thumb-imageoptim/archive/master.zip) as folder `site/plugins/kirby3-thumb-imageoptim` or
+- `git submodule add https://github.com/bnomei/kirby3-thumb-imageoptim.git site/plugins/kirby3-thumb-imageoptim` or
+- `composer require bnomei/kirby3-thumb-imageoptim`
 
 ## Requirements
 
@@ -42,10 +40,16 @@ echo $img->resize(234)->html();
 ```
 
 > *TIP:*
-> If you want your image to be optimized but retain original size use:
+> If you want your image to be optimized but retain their original size use:
 > `$img->resize()` without providing a width or height.
 
 ## Settings
+
+**apikey**
+- default: `null` – your imageoptim apikey as string
+
+> TIP: you can also set a callback if you use the [dotenv Plugin](https://github.com/bnomei/kirby3-dotenv)
+> `'bnomei.thumbimageoptim.apikey' => function() { return env('IMAGEOPTIM_APIKEY'); },`
 
 ### bnomei.thumbimageoptim.optimize
 - default: `true`

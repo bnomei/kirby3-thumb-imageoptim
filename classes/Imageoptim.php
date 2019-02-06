@@ -8,6 +8,9 @@ class Imageoptim
     public static function instance()
     {
         $apikey = option('bnomei.thumbimageoptim.apikey');
+        if (is_callable($apikey)) {
+            $apikey = trimg($apikey());
+        }
         if ($apikey && !static::$instance) {
             static::$instance = new \ImageOptim\API($apikey);
         }
@@ -31,9 +34,9 @@ class Imageoptim
     {
         $r = kirby()->roots()->cache().'/bnomei/thumbimageoptim';
         $cachefiles = \Kirby\Toolkit\Dir::files($r);
-        foreach($cachefiles as $file) {
+        foreach ($cachefiles as $file) {
             $md5 = basename($file, '.cache');
-            if($job = kirby()->cache('bnomei.thumbimageoptim')->get($md5)) {
+            if ($job = kirby()->cache('bnomei.thumbimageoptim')->get($md5)) {
                 if (is_array($job) && array_key_exists('dst', $job)) {
                     $dst = $job['dst'];
                     if (file_exists($dst)) {
