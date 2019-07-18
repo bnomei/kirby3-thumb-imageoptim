@@ -32,7 +32,7 @@ class Imageoptim
 
     public static function removeFilesOfUnfinishedJobs()
     {
-        $r = kirby()->roots()->cache().'/bnomei/thumbimageoptim';
+        $r = kirby()->roots()->cache() . '/bnomei/thumbimageoptim';
         $cachefiles = \Kirby\Toolkit\Dir::files($r);
         foreach ($cachefiles as $file) {
             $md5 = basename($file, '.cache');
@@ -51,7 +51,7 @@ class Imageoptim
         }
     }
 
-    private static function log(string $msg = '', string $level = 'info', array $context = []):bool
+    private static function log(string $msg = '', string $level = 'info', array $context = []): bool
     {
         $log = option('bnomei.thumbimageoptim.log');
         if ($log && is_callable($log)) {
@@ -114,7 +114,7 @@ class Imageoptim
                     if ($pos === false) {
                         return $v;
                     } else {
-                        return substr($v, $pos+1);
+                        return substr($v, $pos + 1);
                     }
                 }, $path);
                 $pathO = implode('/', $pathO);
@@ -147,19 +147,27 @@ class Imageoptim
                 }
             }
             if ($request) {
+                $fit = A::get($settings, 'crop', 'crop');
+                $allowedFitOptions = ['fit', 'crop', 'scale-down', 'pad'];
+                if (null !== $fit && !in_array($fit, $allowedFitOptions)) {
+                    $fit = 'crop';
+                }
                 $request = $request->resize(
-                    $settings['width'],
-                    $settings['height'],
-                    $settings['crop'] == 1 ? 'crop' : 'scale-down'
-                )->quality(
-                    $settings['io_quality']
-                )
-                ->dpr(intval($settings['io_dpr']));
+                    A::get($settings, 'width'),
+                    A::get($settings, 'height'),
+                    A::get($settings, 'height') === null ? null : $fit
+                );
+                if ($io_quality = A::get($settings, 'io_quality')) {
+                    $request = $request->quality($io_quality);
+                }
+                if ($io_dpr = A::get($settings, 'io_dpr')) {
+                    $request = intval($request->dpr($io_dpr));
+                }
 
                 if ($tl = option('bnomei.thumbimageoptim.timelimit')) {
                     set_time_limit(intval($tl));
                 }
-    
+
                 $bytes = null;
                 // https://github.com/bnomei/kirby3-thumb-imageoptim/issues/4
                 if (static::is_localhost() || option('bnomei.thumbimageoptim.forceupload')) {
@@ -168,11 +176,11 @@ class Imageoptim
                     static::log('Image URL', 'debug', [
                         'url' => $request->apiURL()
                     ]);
-    
+
                     // https://github.com/ImageOptim/php-imageoptim-api#apiurl--debug-or-use-another-https-client
                     $bytes = \Kirby\Http\Remote::get($request->apiURL(), ['method' => 'POST'])->content();
                 }
-    
+
                 $success = $bytes ? \Kirby\Toolkit\F::write($dst, $bytes) : false;
                 if ($success) {
                     static::pop($dst);
@@ -195,7 +203,7 @@ class Imageoptim
 
     private static function is_localhost()
     {
-        $whitelist = array( '127.0.0.1', '::1' );
+        $whitelist = array('127.0.0.1', '::1');
         if (in_array($_SERVER['REMOTE_ADDR'], $whitelist)) {
             return true;
         }
