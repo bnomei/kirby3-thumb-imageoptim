@@ -147,21 +147,21 @@ class Imageoptim
                 }
             }
             if ($request) {
-                $fit = A::get($settings, 'crop', 'crop');
+                $fit = \Kirby\Toolkit\A::get($settings, 'crop', 'crop');
                 $allowedFitOptions = ['fit', 'crop', 'scale-down', 'pad'];
                 if (null !== $fit && !in_array($fit, $allowedFitOptions)) {
                     $fit = 'crop';
                 }
                 $request = $request->resize(
-                    A::get($settings, 'width'),
-                    A::get($settings, 'height'),
-                    A::get($settings, 'height') === null ? null : $fit
+                    \Kirby\Toolkit\A::get($settings, 'width'),
+                    \Kirby\Toolkit\A::get($settings, 'height'),
+                    \Kirby\Toolkit\A::get($settings, 'height') === null ? null : $fit
                 );
-                if ($io_quality = A::get($settings, 'io_quality')) {
+                if ($io_quality = \Kirby\Toolkit\A::get($settings, 'io_quality')) {
                     $request = $request->quality($io_quality);
                 }
-                if ($io_dpr = A::get($settings, 'io_dpr')) {
-                    $request = intval($request->dpr($io_dpr));
+                if ($io_dpr = \Kirby\Toolkit\A::get($settings, 'io_dpr')) {
+                    $request = $request->dpr(intval($io_dpr));
                 }
 
                 if ($tl = option('bnomei.thumbimageoptim.timelimit')) {
