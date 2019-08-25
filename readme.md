@@ -55,19 +55,13 @@ echo $img->resize(234)->html();
 
 ## Settings
 
-**apikey**
-- default: `null` – your imageoptim apikey as string
+| bnomei.thumbimageoptim.   | Default        | Description               |            
+|---------------------------|----------------|---------------------------|
+| apikey | `null` | Your imageoptim apikey as string. |
+| optimize | `true` | set to `false` to disable optimization with this plugin |
+| forceupload | `false` | set to `true` when images are not public available (like a website with htpasswd). |
 
-> TIP: you can also set a callback if you use the [dotenv Plugin](https://github.com/bnomei/kirby3-dotenv)
-> `'bnomei.thumbimageoptim.apikey' => function() { return env('IMAGEOPTIM_APIKEY'); },`
-
-### bnomei.thumbimageoptim.optimize
-- default: `true`
-- set to `false` to disable optimization with this plugin
-
-### bnomei.thumbimageoptim.forceupload
-- default: `false`
-- set to `true` when images are not public available (like a website with htpasswd).
+> TIP: You can also set a callback if you use the [dotenv Plugin](https://github.com/bnomei/kirby3-dotenv). <br>`'bnomei.thumbimageoptim.apikey' => function() { return env('IMAGEOPTIM_APIKEY'); },`
 
 > DANGER: Content is always uploaded on localhost. `allow_url_fopen` PHP setting must be enabled for the API to do uploading. Check with `ini_get('allow_url_fopen')`. Please be aware of the potential security risks caused by `allow_url_fopen`!
 
