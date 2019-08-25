@@ -54,5 +54,8 @@
   },
   "extra": {
     "kirby-cms-path": "tests/kirby"
+  },
+  "suggest": {
+    "bnomei/kirby3-srcset": "Srcsets for img and picture element with optional lazyloading markup (js lib not included)"
   }
 }
