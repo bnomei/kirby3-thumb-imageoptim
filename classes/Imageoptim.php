@@ -2,6 +2,20 @@
 
 namespace Bnomei;
 
+// TODO: split in classes for thumb and imageoptim
+
+use ImageOptim\API;
+use Kirby\Cms\Dir;
+use Kirby\Cms\Filename;
+use Kirby\Exception;
+use Kirby\Http\Remote;
+use Kirby\Image\Darkroom;
+use Kirby\Toolkit\A;
+use Kirby\Toolkit\F;
+use function dirname;
+use function md5;
+use function pathinfo;
+
 class Imageoptim
 {
     private static $instance = null;
@@ -12,14 +26,14 @@ class Imageoptim
             $apikey = trim($apikey());
         }
         if ($apikey && !static::$instance) {
-            static::$instance = new \ImageOptim\API($apikey);
+            static::$instance = new API($apikey);
         }
         return static::$instance;
     }
 
     private static function push(string $key, string $value)
     {
-        kirby()->cache('bnomei.thumbimageoptim')->set(\md5($key), [
+        kirby()->cache('bnomei.thumbimageoptim')->set(md5($key), [
             'dst' => $key,
             'time' => $value,
         ]);
@@ -27,7 +41,7 @@ class Imageoptim
 
     private static function pop(string $key)
     {
-        kirby()->cache('bnomei.thumbimageoptim')->remove(\md5($key));
+        kirby()->cache('bnomei.thumbimageoptim')->remove(md5($key));
     }
 
     public static function removeFilesOfUnfinishedJobs()
@@ -68,10 +82,10 @@ class Imageoptim
     public static function kirbyThumb($src, $dst, $options)
     {
         // https://github.com/getkirby/kirby/blob/master/config/components.php#L85
-        $darkroom = \Kirby\Image\Darkroom::factory(option('thumbs.driver', 'gd'), option('thumbs', []));
+        $darkroom = Darkroom::factory(option('thumbs.driver', 'gd'), option('thumbs', []));
         $options  = $darkroom->preprocess($src, $options);
-        $root     = (new \Kirby\Cms\Filename($src, $dst, $options))->toString();
-        \Kirby\Toolkit\F::copy($src, $root);
+        $root     = (new Filename($src, $dst, $options))->toString();
+        F::copy($src, $root);
         $darkroom->process($root, $options);
         return $root;
     }
@@ -107,10 +121,10 @@ class Imageoptim
                 ]);
             } else {
                 // request download
-                $path = explode('/', ltrim(str_replace(kirby()->roots()->content(), '', \dirname($src)), '/'));
+                $path = explode('/', ltrim(str_replace(kirby()->roots()->content(), '', dirname($src)), '/'));
                 $pathO = array_map(function ($v) {
                     // https://github.com/bnomei/kirby3-thumb-imageoptim/issues/2
-                    $pos = strpos($v, \Kirby\Cms\Dir::$numSeparator); // '_'
+                    $pos = strpos($v, Dir::$numSeparator); // '_'
                     if ($pos === false) {
                         return $v;
                     } else {
@@ -120,9 +134,9 @@ class Imageoptim
                 $pathO = implode('/', $pathO);
 
                 $page = page($pathO);
-                \Kirby\Toolkit\F::copy($src, $dst); // or url will not work
+                F::copy($src, $dst); // or url will not work
 
-                if ($img = $page->image(\pathinfo($src, PATHINFO_BASENAME))) {
+                if ($img = $page->image(pathinfo($src, PATHINFO_BASENAME))) {
                     $url = $img->url();
                     $request = $api->imageFromURL($url);
 
@@ -140,27 +154,27 @@ class Imageoptim
                             'src' => $src,
                             'dst' => $dst,
                             'pathO' => $pathO,
-                            'file' => \pathinfo($src, PATHINFO_BASENAME),
+                            'file' => pathinfo($src, PATHINFO_BASENAME),
                             'options' => $options,
                         ]);
                     }
                 }
             }
             if ($request) {
-                $fit = \Kirby\Toolkit\A::get($settings, 'crop', 'crop');
+                $fit = A::get($settings, 'crop', 'crop');
                 $allowedFitOptions = ['fit', 'crop', 'scale-down', 'pad'];
                 if (null !== $fit && !in_array($fit, $allowedFitOptions)) {
                     $fit = 'crop';
                 }
                 $request = $request->resize(
-                    \Kirby\Toolkit\A::get($settings, 'width'),
-                    \Kirby\Toolkit\A::get($settings, 'height'),
-                    \Kirby\Toolkit\A::get($settings, 'height') === null ? null : $fit
+                    A::get($settings, 'width'),
+                    A::get($settings, 'height'),
+                    A::get($settings, 'height') === null ? null : $fit
                 );
-                if ($io_quality = \Kirby\Toolkit\A::get($settings, 'io_quality')) {
+                if ($io_quality = A::get($settings, 'io_quality')) {
                     $request = $request->quality($io_quality);
                 }
-                if ($io_dpr = \Kirby\Toolkit\A::get($settings, 'io_dpr')) {
+                if ($io_dpr = A::get($settings, 'io_dpr')) {
                     $request = $request->dpr(intval($io_dpr));
                 }
 
@@ -178,10 +192,10 @@ class Imageoptim
                     ]);
 
                     // https://github.com/ImageOptim/php-imageoptim-api#apiurl--debug-or-use-another-https-client
-                    $bytes = \Kirby\Http\Remote::get($request->apiURL(), ['method' => 'POST'])->content();
+                    $bytes = Remote::get($request->apiURL(), ['method' => 'POST'])->content();
                 }
 
-                $success = $bytes ? \Kirby\Toolkit\F::write($dst, $bytes) : false;
+                $success = $bytes ? F::write($dst, $bytes) : false;
                 if ($success) {
                     static::pop($dst);
                 }
@@ -192,7 +206,7 @@ class Imageoptim
                 'dst' => $dst,
                 'options' => $options,
             ]);
-            new \Kirby\Exception($ex->getMessage());
+            new Exception($ex->getMessage());
         }
 
         if ($success) {
