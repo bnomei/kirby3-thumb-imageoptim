@@ -4,32 +4,38 @@
 
 Kirby::plugin('bnomei/thumbimageoptim', [
     'options' => [
-      'optimize' => true,
-      'forceupload' => false,
-      'apikey' => null,
-      'defaults' => [
-          'io_quality' => 'medium',
-          'io_dpr' => '1',
-      ],
-      'timelimit' => 30, // set_time_limit
-      'log.enabled' => false,
-      'log' => function (string $msg, string $level = 'info', array $context = []):bool {
-          if (option('bnomei.thumbimageoptim.log.enabled') && function_exists('kirbyLog')) {
-              kirbyLog('bnomei.thumbimageoptim.log')->log($msg, $level, $context);
-              return true;
-          }
-          return false;
-      },
-      'cache' => true,
+        'apikey' => function () {
+            return null;
+        // return env('IMAGEOPTIM_APIKEY');
+        },
+        'enabled' => true,
+        'forceupload' => false,
+        'timelimit' => null, // use server default
+        'apirequest' => [
+            'io_quality' => 'medium',
+            'io_dpr' => '1',
+        ],
+        'cache.stack' => true,
+        'cache.index' => true,
     ],
     'components' => [
         'thumb' => function ($kirby, $src, $dst, $options) {
-            return \Bnomei\Imageoptim::thumb($src, $dst, $options);
-        }
+            return \Bnomei\Imageoptim::singleton()->optimize($src, $dst, $options);
+        },
+    ],
+    'fileMethods' => [
+        'thumbimageoptim' => function (?int $w = null, ?int $h = null, ?int $q = null) {
+            // NOTE: $this->resize() worked in k 3.1.x but not anymore
+            $w = $w ?? $this->width();
+            $h = $h ?? $this->height();
+            $q = $q ?? option('thumbs.quality', 80);
+            // NOTE: mapping int to io_string of quality is useless. use only global io setting.
+            return $this->resize($w, $h); // NOT using: $q
+        },
     ],
     'hooks' => [
-      'route:before' => function () {
-          \Bnomei\Imageoptim::removeFilesOfUnfinishedJobs();
-      },
+        'route:before' => function () {
+            \Bnomei\Imageoptim::singleton()->removeAllUnoptimized();
+        },
     ],
-  ]);
+]);

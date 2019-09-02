@@ -43,28 +43,43 @@ In your `site/config.php` options set the [ImageOptim API key](https://imageopti
 ]
 ```
 
-Generate thumbs as usual using `resize()` File Method.
+> TIP: You can also set a callback if you use the [dotenv Plugin](https://github.com/bnomei/kirby3-dotenv). <br>`'bnomei.thumbimageoptim.apikey' => function() { return env('IMAGEOPTIM_APIKEY'); },`
+
+## Usage
+
+Generate thumbs as usual using `resize()` File Method or the `srcset()` function.
 
 ```php
 $img = $page->image('ukulele.jpg');
 echo $img->resize(234)->html();
 ```
 
-> *TIP:*
-> If you want your image to be optimized but retain their original size use:
-> `$img->resize()` without providing a width or height.
+If you want your image to be optimized but retain their original size use: `$img->thumbimageoptim()`. You can providing a width or height but its optional.
+
+```php
+$img = $page->image('ukulele.jpg');
+echo $img->thumbimageoptim()->html();
+// matches
+echo $img->resize($img->width())->html();
+```
+
+> TIP: if you use `$img->resize()` without a param you will **not** generate a thumb and it will **not** be optimized.
+
+This plugin will work with the [Srcset Plugin](https://github.com/bnomei/kirby3-srcset/) but be aware that depending on your srcset config a lot of files might be requested to be optimized. The requests are **not** send aync but one after another waiting for the response. The plugin will discard unfinished requests on next retry.
 
 ## Settings
 
 | bnomei.thumbimageoptim.   | Default        | Description               |            
 |---------------------------|----------------|---------------------------|
-| apikey | `null` | Your imageoptim apikey as string. |
-| optimize | `true` | set to `false` to disable optimization with this plugin |
+| apikey | `callback` or `null` | Your imageoptim apikey as string. |
+| enabled | `true` | set to `false` to disable optimization with this plugin |
 | forceupload | `false` | set to `true` when images are not public available (like a website with htpasswd). |
+| timelimit | `null` or `int` | if `int` value is set `set_time_limit` will be called for **each** request |
+| apirequest | `array` | default `io_quality` and `io_dpr` values |
 
-> TIP: You can also set a callback if you use the [dotenv Plugin](https://github.com/bnomei/kirby3-dotenv). <br>`'bnomei.thumbimageoptim.apikey' => function() { return env('IMAGEOPTIM_APIKEY'); },`
+## Localhost and forceupload
 
-> DANGER: Content is always uploaded on localhost. `allow_url_fopen` PHP setting must be enabled for the API to do uploading. Check with `ini_get('allow_url_fopen')`. Please be aware of the potential security risks caused by `allow_url_fopen`!
+Content is always uploaded on localhost. The `allow_url_fopen` PHP setting must be enabled for the API to do uploading. Check with `ini_get('allow_url_fopen')`. Please be aware of the potential security risks caused by `allow_url_fopen`!
 
 ## Disclaimer
 

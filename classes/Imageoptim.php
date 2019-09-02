@@ -1,225 +1,154 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Bnomei;
 
-// TODO: split in classes for thumb and imageoptim
-
-use ImageOptim\API;
-use Kirby\Cms\Dir;
-use Kirby\Cms\Filename;
-use Kirby\Exception;
-use Kirby\Http\Remote;
-use Kirby\Image\Darkroom;
+use Kirby\Exception\InvalidArgumentException;
 use Kirby\Toolkit\A;
-use Kirby\Toolkit\F;
-use function dirname;
-use function md5;
-use function pathinfo;
+use function option;
 
-class Imageoptim
+final class Imageoptim
 {
-    private static $instance = null;
-    public static function instance()
+    /*
+     * @var array
+     */
+    private $options;
+
+    /**
+     * Imageoptim constructor.
+     * @param array $options
+     */
+    public function __construct(array $options = [])
     {
-        $apikey = option('bnomei.thumbimageoptim.apikey');
-        if (is_callable($apikey)) {
-            $apikey = trim($apikey());
-        }
-        if ($apikey && !static::$instance) {
-            static::$instance = new API($apikey);
-        }
-        return static::$instance;
+        $defaults = [
+            'debug' => option('debug'),
+        ];
+        $this->options = array_merge($defaults, $options);
     }
 
-    private static function push(string $key, string $value)
+    /**
+     * @param string|null $key
+     * @return array|mixed
+     */
+    public function option(?string $key = null)
     {
-        kirby()->cache('bnomei.thumbimageoptim')->set(md5($key), [
-            'dst' => $key,
-            'time' => $value,
-        ]);
+        if ($key) {
+            return A::get($this->options, $key);
+        }
+        return $this->options;
     }
 
-    private static function pop(string $key)
+    /**
+     * @param $src
+     * @param $dst
+     * @param $thumbOptions
+     * @return mixed
+     */
+    public function optimize($src, $dst, $thumbOptions)
     {
-        kirby()->cache('bnomei.thumbimageoptim')->remove(md5($key));
+        $this->push($dst, date('c'));
+
+        $thumbOptions = array_merge($this->options, $thumbOptions);
+
+        $thumb = new Thumb($thumbOptions);
+        $filePath = $thumb->imageoptim($src, $dst, $thumbOptions);
+        if (is_null($filePath)) {
+            $filePath = $thumb->core($src, $dst, $thumbOptions);
+        }
+
+        $this->pop($dst);
+        return $dst;
     }
 
-    public static function removeFilesOfUnfinishedJobs()
+    /**
+     * @param string $key
+     * @param string $value
+     * @return bool
+     * @throws InvalidArgumentException
+     */
+    public function push(string $key, string $value): bool
     {
-        $r = kirby()->roots()->cache() . '/bnomei/thumbimageoptim';
-        $cachefiles = \Kirby\Toolkit\Dir::files($r);
-        foreach ($cachefiles as $file) {
-            $md5 = basename($file, '.cache');
-            if ($job = kirby()->cache('bnomei.thumbimageoptim')->get($md5)) {
-                if (is_array($job) && array_key_exists('dst', $job)) {
-                    $dst = $job['dst'];
-                    if (file_exists($dst)) {
-                        if (unlink($dst)) {
-                            static::pop($dst);
-                        }
-                    } else {
-                        static::pop($dst);
-                    }
-                }
-            }
+        $id = strval(crc32($key));
+        kirby()->cache('bnomei.thumbimageoptim.stack')->set(
+            $id,
+            [
+                'dst' => $key,
+                'time' => $value,
+            ]
+        );
+        $index = kirby()->cache('bnomei.thumbimageoptim.index')->get('index', []);
+        $index[] = $id;
+        return kirby()->cache('bnomei.thumbimageoptim.index')->set('index', $index);
+    }
+
+    /**
+     * @param string $key
+     * @return bool
+     * @throws InvalidArgumentException
+     */
+    public function pop(string $key): bool
+    {
+        $id = strval(crc32($key));
+        kirby()->cache('bnomei.thumbimageoptim.stack')->remove(
+            $id
+        );
+        $index = kirby()->cache('bnomei.thumbimageoptim.index')->get('index', []);
+        $found = array_search($id, $index);
+        if ($found !== false) {
+            unset($index[$found]);
+        }
+        return kirby()->cache('bnomei.thumbimageoptim.index')->set('index', $index);
+    }
+
+    /**
+     * Thumb copies original file before optimizing.
+     * Remove these if api call did not finish.
+     */
+    public function removeAllUnoptimized()
+    {
+        $index = kirby()->cache('bnomei.thumbimageoptim.index')->get('index', []);
+        foreach ($index as $id) {
+            $dst = A::get(
+                kirby()->cache('bnomei.thumbimageoptim.stack')->get($id, []),
+                'dst'
+            );
+            $this->removeDst($dst);
         }
     }
 
-    private static function log(string $msg = '', string $level = 'info', array $context = []): bool
+    /**
+     * @param string|null $dst
+     * @return bool
+     */
+    public function removeDst(?string $dst = null): bool
     {
-        $log = option('bnomei.thumbimageoptim.log');
-        if ($log && is_callable($log)) {
-            if (!option('debug') && $level == 'debug') {
-                // skip but...
-                return true;
-            } else {
-                return $log($msg, $level, $context);
-            }
+        if (!$dst) {
+            return false;
         }
-        return false;
+        if (file_exists($dst) && !unlink($dst)) {
+            return false;
+        }
+        return $this->pop($dst);
     }
 
-    public static function kirbyThumb($src, $dst, $options)
+    /*
+     * @var Imageoptim
+     */
+    private static $singleton = null;
+
+    /**
+     * @param array $options
+     * @return Imageoptim
+     * @codeCoverageIgnore
+     */
+    public static function singleton(array $options = []): Imageoptim
     {
-        // https://github.com/getkirby/kirby/blob/master/config/components.php#L85
-        $darkroom = Darkroom::factory(option('thumbs.driver', 'gd'), option('thumbs', []));
-        $options  = $darkroom->preprocess($src, $options);
-        $root     = (new Filename($src, $dst, $options))->toString();
-        F::copy($src, $root);
-        $darkroom->process($root, $options);
-        return $root;
-    }
-
-    public static function thumb($src, $dst, $options)
-    {
-        $api = static::instance();
-        if (!option('bnomei.thumbimageoptim.optimize') || !$api) {
-            static::log('kirbyThumb:early', 'debug', [
-                'src' => $src,
-                'dst' => $dst,
-                'options' => $options,
-            ]);
-            return static::kirbyThumb($src, $dst, $options);
+        if (self::$singleton) {
+            return self::$singleton;
         }
 
-        $success = false;
-        $defaults = option('bnomei.thumbimageoptim.defaults');
-        $settings = array_merge($options, $defaults);
-
-        static::push($dst, date('c'));
-
-        try {
-            // https://github.com/ImageOptim/php-imageoptim-api
-            $request = null;
-            if (static::is_localhost() || option('bnomei.thumbimageoptim.forceupload')) {
-                // upload
-                $request = $api->imageFromPath($src);
-                static::log('imageFromPath', 'debug', [
-                    'src' => $src,
-                    'dst' => $dst,
-                    'options' => $options,
-                ]);
-            } else {
-                // request download
-                $path = explode('/', ltrim(str_replace(kirby()->roots()->content(), '', dirname($src)), '/'));
-                $pathO = array_map(function ($v) {
-                    // https://github.com/bnomei/kirby3-thumb-imageoptim/issues/2
-                    $pos = strpos($v, Dir::$numSeparator); // '_'
-                    if ($pos === false) {
-                        return $v;
-                    } else {
-                        return substr($v, $pos + 1);
-                    }
-                }, $path);
-                $pathO = implode('/', $pathO);
-
-                $page = page($pathO);
-                F::copy($src, $dst); // or url will not work
-
-                if ($img = $page->image(pathinfo($src, PATHINFO_BASENAME))) {
-                    $url = $img->url();
-                    $request = $api->imageFromURL($url);
-
-                    if (option('bnomei.thumbimageoptim.log.enabled')) {
-                        static::log('imageFromURL', 'debug', [
-                            'src' => $src,
-                            'dst' => $dst,
-                            'dst-url' => $url,
-                            'options' => $options,
-                        ]);
-                    }
-                } else {
-                    if (option('bnomei.thumbimageoptim.log.enabled')) {
-                        static::log('Image not found at Page-object', 'warning', [
-                            'src' => $src,
-                            'dst' => $dst,
-                            'pathO' => $pathO,
-                            'file' => pathinfo($src, PATHINFO_BASENAME),
-                            'options' => $options,
-                        ]);
-                    }
-                }
-            }
-            if ($request) {
-                $fit = A::get($settings, 'crop', 'crop');
-                $allowedFitOptions = ['fit', 'crop', 'scale-down', 'pad'];
-                if (null !== $fit && !in_array($fit, $allowedFitOptions)) {
-                    $fit = 'crop';
-                }
-                $request = $request->resize(
-                    A::get($settings, 'width'),
-                    A::get($settings, 'height'),
-                    A::get($settings, 'height') === null ? null : $fit
-                );
-                if ($io_quality = A::get($settings, 'io_quality')) {
-                    $request = $request->quality($io_quality);
-                }
-                if ($io_dpr = A::get($settings, 'io_dpr')) {
-                    $request = $request->dpr(intval($io_dpr));
-                }
-
-                if ($tl = option('bnomei.thumbimageoptim.timelimit')) {
-                    set_time_limit(intval($tl));
-                }
-
-                $bytes = null;
-                // https://github.com/bnomei/kirby3-thumb-imageoptim/issues/4
-                if (static::is_localhost() || option('bnomei.thumbimageoptim.forceupload')) {
-                    $bytes = $request->getBytes();
-                } else {
-                    static::log('Image URL', 'debug', [
-                        'url' => $request->apiURL()
-                    ]);
-
-                    // https://github.com/ImageOptim/php-imageoptim-api#apiurl--debug-or-use-another-https-client
-                    $bytes = Remote::get($request->apiURL(), ['method' => 'POST'])->content();
-                }
-
-                $success = $bytes ? F::write($dst, $bytes) : false;
-                if ($success) {
-                    static::pop($dst);
-                }
-            }
-        } catch (Exception $ex) {
-            static::log($ex->getMessage(), 'error', [
-                'src' => $src,
-                'dst' => $dst,
-                'options' => $options,
-            ]);
-            new Exception($ex->getMessage());
-        }
-
-        if ($success) {
-            return $dst;
-        }
-        return null;
-    }
-
-    private static function is_localhost()
-    {
-        $whitelist = array('127.0.0.1', '::1');
-        if (in_array($_SERVER['REMOTE_ADDR'], $whitelist)) {
-            return true;
-        }
+        self::$singleton = new self($options);
+        return self::$singleton;
     }
 }

@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Bnomei\\Imageoptim' => $baseDir . '/classes/Imageoptim.php',
+    'Bnomei\\Thumb' => $baseDir . '/classes/Thumb.php',
     'ImageOptim\\API' => $vendorDir . '/imageoptim/imageoptim/src/API.php',
     'ImageOptim\\APIException' => $vendorDir . '/imageoptim/imageoptim/src/APIException.php',
     'ImageOptim\\AccessDeniedException' => $vendorDir . '/imageoptim/imageoptim/src/AccessDeniedException.php',

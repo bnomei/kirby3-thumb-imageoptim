@@ -38,6 +38,7 @@ class ComposerStaticInitc14e89fafce21e20f0b2ebc93978c796
 
     public static $classMap = array (
         'Bnomei\\Imageoptim' => __DIR__ . '/../..' . '/classes/Imageoptim.php',
+        'Bnomei\\Thumb' => __DIR__ . '/../..' . '/classes/Thumb.php',
         'ImageOptim\\API' => __DIR__ . '/..' . '/imageoptim/imageoptim/src/API.php',
         'ImageOptim\\APIException' => __DIR__ . '/..' . '/imageoptim/imageoptim/src/APIException.php',
         'ImageOptim\\AccessDeniedException' => __DIR__ . '/..' . '/imageoptim/imageoptim/src/AccessDeniedException.php',
