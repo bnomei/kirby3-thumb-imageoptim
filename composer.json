@@ -17,7 +17,9 @@
     "image-optimization",
     "thumbnail",
     "thumb",
-    "component"
+    "component",
+    "srcset",
+    "resize"
   ],
   "autoload": {
     "psr-4": {
