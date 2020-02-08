@@ -141,7 +141,7 @@ final class Thumb
      */
     public function imageFromSrc(string $src): ?File
     {
-        $path = explode('/', ltrim(str_replace(kirby()->roots()->content(), '', dirname($src)), '/'));
+        $path = explode('/', ltrim(str_replace(realpath(kirby()->roots()->content()), '', dirname($src)), '/'));
         $pathO = array_map(function ($value) {
             // https://github.com/bnomei/kirby3-thumb-imageoptim/issues/2
             $pos = strpos($value, Dir::$numSeparator); // '_'
