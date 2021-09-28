@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'pretty_version' => '2.0.2',
+        'version' => '2.0.2.0',
+        'type' => 'kirby-plugin',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'reference' => NULL,
+        'name' => 'bnomei/kirby3-thumb-imageoptim',
+        'dev' => false,
+    ),
+    'versions' => array(
+        'bnomei/kirby3-thumb-imageoptim' => array(
+            'pretty_version' => '2.0.2',
+            'version' => '2.0.2.0',
+            'type' => 'kirby-plugin',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'reference' => NULL,
+            'dev_requirement' => false,
+        ),
+        'getkirby/composer-installer' => array(
+            'pretty_version' => '1.2.1',
+            'version' => '1.2.1.0',
+            'type' => 'composer-plugin',
+            'install_path' => __DIR__ . '/../getkirby/composer-installer',
+            'aliases' => array(),
+            'reference' => 'c98ece30bfba45be7ce457e1102d1b169d922f3d',
+            'dev_requirement' => false,
+        ),
+        'imageoptim/imageoptim' => array(
+            'pretty_version' => '1.3.1',
+            'version' => '1.3.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../imageoptim/imageoptim',
+            'aliases' => array(),
+            'reference' => 'b73eb5d6747fc181de86b2de50fb158dff463618',
+            'dev_requirement' => false,
+        ),
+    ),
+);
