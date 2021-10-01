@@ -9,7 +9,7 @@
 
 Kirby 3 CMS Thumb Component to optimize images using ImageOptim Api.
 
-## Commerical Usage
+## Commercial Usage
 
 > <br>
 > <b>Support open source!</b><br><br>
