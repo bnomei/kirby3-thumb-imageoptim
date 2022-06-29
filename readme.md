@@ -1,3 +1,8 @@
+> <br>
+> The used php lib will most likely not recieve an update for php 8 so I decieded to drop support for this plugin.
+> <br><br>
+
+
 # Kirby 3 Thumb Imageoptim
 
 ![Release](https://flat.badgen.net/packagist/v/bnomei/kirby3-thumb-imageoptim?color=ae81ff)
